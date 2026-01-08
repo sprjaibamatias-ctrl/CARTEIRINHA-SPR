@@ -3,151 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Carteirinha - SPR Jaíba e Matias</title>
+    <title>Sistema SPR - Jaíba e Matias</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @media print { .no-print { display: none; } }
-        .card-bg { background-color: #1a4731; }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+        body { font-family: 'Roboto', sans-serif; }
+        .card-green { background-color: #004d2c; }
     </style>
 </head>
-<body class="bg-slate-100 p-4">
-    <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-8">
-        <div class="w-full md:w-1/3 bg-white p-6 rounded-xl shadow-lg no-print">
-            <h2 class="text-xl font-bold mb-4 text-green-800">Dados do Associado</h2>
+<body class="bg-gray-200 p-4">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
+        <div class="w-full md:w-80 bg-white p-5 rounded-lg shadow-md no-print">
+            <h2 class="text-lg font-black text-green-900 mb-4 border-b pb-2">DADOS DO FILIADO</h2>
             <div class="space-y-3 text-sm">
-                <div>
-                    <label class="block font-medium">Nome Completo</label>
-                    <input type="text" id="nome" class="w-full border p-2 rounded">
-                </div>
+                <input type="text" id="nome" placeholder="Nome Completo" class="w-full border p-2 rounded">
                 <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium">CPF</label>
-                        <input type="text" id="cpf" placeholder="000.000.000-00" class="w-full border p-2 rounded">
-                    </div>
-                    <div>
-                        <label class="block font-medium">Nascimento</label>
-                        <input type="date" id="nascimento" class="w-full border p-2 rounded">
-                    </div>
+                    <input type="text" id="cpf" placeholder="CPF" class="w-full border p-2 rounded">
+                    <input type="date" id="nasc" class="w-full border p-2 rounded" title="Nascimento">
                 </div>
-                <div>
-                    <label class="block font-medium">Telefone</label>
-                    <input type="text" id="telefone" placeholder="(00) 00000-0000" class="w-full border p-2 rounded">
-                </div>
-                <div>
-                    <label class="block font-medium">Categoria</label>
-                    <select id="categoria" class="w-full border p-2 rounded">
-                        <option value="Agricultor">Agricultor</option>
-                        <option value="Pecuarista">Pecuarista</option>
-                    </select>
-                </div>
+                <input type="text" id="tel" placeholder="Telefone" class="w-full border p-2 rounded">
+                <select id="cat" class="w-full border p-2 rounded">
+                    <option value="AGRICULTOR">AGRICULTOR</option>
+                    <option value="PECUARISTA">PECUARISTA</option>
+                </select>
                 <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium">Última Filiação</label>
-                        <input type="date" id="filiacao" class="w-full border p-2 rounded">
-                    </div>
-                    <div>
-                        <label class="block font-medium">Validade</label>
-                        <input type="date" id="validade" class="w-full border p-2 rounded">
-                    </div>
+                    <div class="text-[10px] font-bold">ÚLT. FILIAÇÃO<input type="date" id="fili" class="w-full border p-1 rounded font-normal"></div>
+                    <div class="text-[10px] font-bold">VALIDADE<input type="date" id="val" class="w-full border p-1 rounded font-normal"></div>
                 </div>
-                <div>
-                    <label class="block font-medium">Foto do Associado</label>
-                    <input type="file" id="fotoInput" accept="image/*" class="w-full border p-2 rounded">
+                <div class="bg-gray-50 p-2 border-dashed border-2 rounded">
+                    <label class="block text-[10px] font-bold mb-1">FOTO DO ASSOCIADO</label>
+                    <input type="file" id="fotoIn" accept="image/*" class="text-[10px] w-full">
                 </div>
-                <button onclick="gerarCarteirinha()" class="w-full bg-green-700 text-white py-3 rounded-lg font-bold hover:bg-green-800 transition">Gerar Carteirinha</button>
+                <button onclick="gerar()" class="w-full bg-green-700 text-white font-bold py-3 rounded hover:bg-green-800 uppercase shadow-lg">Gerar Carteirinha</button>
             </div>
         </div>
 
-        <div id="listaCarteirinhas" class="flex-1 space-y-6">
-            </div>
+        <div id="resultado" class="flex-1 flex flex-col items-center gap-6"></div>
     </div>
 
     <script>
-        function gerarCarteirinha() {
-            const dados = {
-                nome: document.getElementById('nome').value.toUpperCase(),
-                cpf: document.getElementById('cpf').value,
-                nascimento: new Date(document.getElementById('nascimento').value).toLocaleDateString('pt-BR'),
-                telefone: document.getElementById('telefone').value,
-                categoria: document.getElementById('categoria').value,
-                filiacao: new Date(document.getElementById('filiacao').value).toLocaleDateString('pt-BR'),
-                validade: new Date(document.getElementById('validade').value).toLocaleDateString('pt-BR'),
-                id: Date.now()
-            };
+        function gerar() {
+            const f = document.getElementById('fotoIn').files[0];
+            if(!f) return alert("Selecione a foto!");
 
-            const fotoFile = document.getElementById('fotoInput').files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
+            const r = new FileReader();
+            r.onload = function(e) {
+                const id = Date.now();
                 const html = `
-                    <div id="card-${dados.id}" class="relative w-[400px] h-[250px] bg-white rounded-xl shadow-2xl border-2 border-green-900 overflow-hidden mx-auto bg-slate-50">
-                        <div class="card-bg h-16 flex items-center px-4 relative">
-                            <div class="text-white">
-                                <h1 class="font-bold text-sm leading-tight">SPR - JAÍBA E MATIAS CARDOSO</h1>
-                                <p class="text-[9px] opacity-90">SINDICATO DOS PRODUTORES RURAIS</p>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-xl shadow-sm border border-gray-300">
+                        <div id="card-${id}" class="relative w-[450px] h-[280px] bg-white overflow-hidden shadow-2xl border border-gray-400">
+                            <div class="card-green h-20 px-4 flex items-center justify-between">
+                                <div class="text-white">
+                                    <p class="text-[14px] font-black leading-tight">SPR JAÍBA E MATIAS CARDOSO</p>
+                                    <p class="text-[10px] font-light">SINDICATO DOS PRODUTORES RURAIS</p>
+                                </div>
+                                <img src="logo-spr.png" class="h-14 bg-white p-1 rounded shadow-md" onerror="this.src='https://via.placeholder.com/100x50?text=LOGO+SPR'">
                             </div>
-                            <img src="https://i.ibb.co/Lhy06fN/logo-spr.png" class="absolute right-2 top-1 h-14 bg-white p-1 rounded shadow-sm" alt="Logo SPR">
-                        </div>
 
-                        <div class="p-3 flex gap-4">
-                            <div class="mt-4">
-                                <div class="w-24 h-28 bg-gray-200 border-2 border-green-800 rounded-md overflow-hidden shadow-inner">
+                            <div class="flex p-4 gap-4">
+                                <div class="w-28 h-32 border-2 border-green-900 rounded bg-gray-100 overflow-hidden shadow-md">
                                     <img src="${e.target.result}" class="w-full h-full object-cover">
                                 </div>
-                            </div>
 
-                            <div class="flex-1 space-y-1 pt-1">
-                                <div>
-                                    <p class="text-[8px] uppercase text-gray-500 font-bold">Nome do Associado</p>
-                                    <p class="text-[13px] font-black text-green-900 leading-tight border-b border-gray-200 pb-1">${dados.nome}</p>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 mt-1">
-                                    <div>
-                                        <p class="text-[8px] text-gray-500 font-bold uppercase">CPF</p>
-                                        <p class="text-[10px] font-bold text-gray-800">${dados.cpf}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-[8px] text-gray-500 font-bold uppercase">Nascimento</p>
-                                        <p class="text-[10px] font-bold text-gray-800">${dados.nascimento}</p>
+                                <div class="flex-1">
+                                    <p class="text-[9px] text-gray-500 font-bold uppercase">Nome do Filiado</p>
+                                    <p class="text-[15px] font-black text-green-950 mb-2 border-b border-gray-200">${document.getElementById('nome').value.toUpperCase()}</p>
+                                    
+                                    <div class="grid grid-cols-2 gap-y-2">
+                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">CPF</p><p class="text-[11px] font-bold text-gray-800">${document.getElementById('cpf').value}</p></div>
+                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">Nascimento</p><p class="text-[11px] font-bold text-gray-800">${new Date(document.getElementById('nasc').value).toLocaleDateString('pt-BR')}</p></div>
+                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">Telefone</p><p class="text-[11px] font-bold text-gray-800">${document.getElementById('tel').value}</p></div>
+                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">Categoria</p><p class="text-[11px] font-bold text-gray-800">${document.getElementById('cat').value}</p></div>
                                     </div>
                                 </div>
-                                <div>
-                                    <p class="text-[8px] text-gray-500 font-bold uppercase">Telefone</p>
-                                    <p class="text-[10px] font-bold text-gray-800">${dados.telefone}</p>
-                                </div>
                             </div>
+
+                            <div class="absolute bottom-6 w-full flex justify-around bg-green-50 border-t border-b border-green-200 py-1">
+                                <div class="text-center"><p class="text-[7px] font-bold uppercase">Últ. Filiação</p><p class="text-[10px] font-bold">${new Date(document.getElementById('fili').value).toLocaleDateString('pt-BR')}</p></div>
+                                <div class="text-center"><p class="text-[7px] font-bold uppercase text-red-600">Validade</p><p class="text-[10px] font-bold text-red-600">${new Date(document.getElementById('val').value).toLocaleDateString('pt-BR')}</p></div>
+                            </div>
+
+                            <div class="absolute bottom-0 w-full card-green py-1 text-center text-white text-[10px] font-bold tracking-[3px]">CARTEIRA DE SINDICALIZADO</div>
                         </div>
 
-                        <div class="absolute bottom-6 left-0 right-0 bg-green-50 border-t border-b border-green-200 py-1 px-4 flex justify-between text-center">
-                            <div>
-                                <p class="text-[7px] font-bold text-green-800 uppercase">Filiação/Renovação</p>
-                                <p class="text-[9px] font-black text-gray-800">${dados.filiacao}</p>
-                            </div>
-                            <div>
-                                <p class="text-[7px] font-bold text-green-800 uppercase">Categoria</p>
-                                <p class="text-[9px] font-black text-gray-800">${dados.categoria}</p>
-                            </div>
-                            <div>
-                                <p class="text-[7px] font-bold text-red-700 uppercase">Validade</p>
-                                <p class="text-[9px] font-black text-red-700">${dados.validade}</p>
-                            </div>
-                        </div>
-
-                        <div class="absolute bottom-0 w-full card-bg py-1 text-center text-white text-[9px] font-bold tracking-widest">
-                            CARTEIRA DE SINDICALIZADO
-                        </div>
-
-                        <div class="no-print absolute top-18 right-2 flex gap-1 pt-16">
-                            <button onclick="window.print()" class="bg-white/80 hover:bg-white p-1 rounded text-green-800 border border-green-800 shadow text-[10px]">🖨️ Imprimir</button>
-                            <button onclick="document.getElementById('card-${dados.id}').remove()" class="bg-red-500/80 hover:bg-red-500 p-1 rounded text-white shadow text-[10px]">❌</button>
+                        <div class="mt-4 flex gap-4">
+                            <button onclick="baixar('card-${id}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow hover:bg-blue-700">⬇ BAIXAR COLORIDO (PNG)</button>
+                            <button onclick="this.parentElement.parentElement.remove()" class="text-red-500 font-bold text-sm">Excluir</button>
                         </div>
                     </div>
                 `;
-                document.getElementById('listaCarteirinhas').insertAdjacentHTML('afterbegin', html);
+                document.getElementById('resultado').insertAdjacentHTML('afterbegin', html);
             };
+            r.readAsDataURL(f);
+        }
 
-            if(fotoFile) reader.readAsDataURL(fotoFile);
-            else alert("Por favor, selecione uma foto!");
+        function baixar(id) {
+            html2canvas(document.getElementById(id), { scale: 3 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'carteirinha-filiado.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
         }
     </script>
 </body>
