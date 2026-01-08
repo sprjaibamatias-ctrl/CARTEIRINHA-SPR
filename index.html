@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema SPR - Jaíba e Matias</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
         body { font-family: 'Roboto', sans-serif; background-color: #f1f5f9; }
         
-        /* Ajuste para cores aparecerem na impressão */
         @media print {
             body { background: none; padding: 0; }
             .no-print { display: none !important; }
@@ -23,7 +23,7 @@
 <body class="p-4">
     <div class="max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
         <div class="w-full md:w-80 bg-white p-5 rounded-lg shadow-md no-print border-t-4 border-green-800">
-            <h2 class="text-lg font-black text-green-900 mb-4 border-b pb-2 text-center">NOVA CARTEIRINHA</h2>
+            <h2 class="text-lg font-black text-green-900 mb-4 border-b pb-2 text-center uppercase text-sm">Painel de Emissão</h2>
             <div class="space-y-3 text-sm">
                 <input type="text" id="nome" placeholder="NOME COMPLETO" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none">
                 <div class="grid grid-cols-2 gap-2">
@@ -39,79 +39,64 @@
                     <div class="text-[10px] font-bold uppercase text-gray-500">ÚLT. FILIAÇÃO<input type="date" id="fili" class="w-full border p-1 rounded font-normal text-black"></div>
                     <div class="text-[10px] font-bold uppercase text-gray-500">VALIDADE<input type="date" id="val" class="w-full border p-1 rounded font-normal text-black"></div>
                 </div>
-                <div class="bg-green-50 p-2 border-dashed border-2 border-green-200 rounded">
-                    <label class="block text-[10px] font-bold mb-1 text-green-800 uppercase">FOTO DO ASSOCIADO</label>
-                    <input type="file" id="fotoIn" accept="image/*" class="text-[10px] w-full">
+                
+                <div class="space-y-2">
+                    <div class="bg-gray-50 p-2 border-dashed border-2 border-gray-200 rounded">
+                        <label class="block text-[10px] font-bold mb-1 text-gray-600 uppercase">1. Logo do Sindicato</label>
+                        <input type="file" id="logoIn" accept="image/*" class="text-[10px] w-full">
+                    </div>
+                    <div class="bg-green-50 p-2 border-dashed border-2 border-green-200 rounded">
+                        <label class="block text-[10px] font-bold mb-1 text-green-800 uppercase">2. Foto do Associado</label>
+                        <input type="file" id="fotoIn" accept="image/*" class="text-[10px] w-full">
+                    </div>
                 </div>
-                <button onclick="gerar()" class="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-800 transition-all uppercase shadow-md">Gerar para Impressão</button>
+
+                <button onclick="gerar()" class="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-800 transition-all uppercase shadow-md mt-2">Gerar Carteirinha</button>
             </div>
         </div>
 
         <div id="resultado" class="flex-1 flex flex-col items-center">
-            <p class="text-gray-400 mt-10 no-print font-medium">Preencha os dados ao lado para visualizar a carteirinha.</p>
+            <p class="text-gray-400 mt-10 no-print font-medium italic">Aguardando preenchimento dos dados e imagens...</p>
         </div>
     </div>
 
     <script>
         function gerar() {
-            const f = document.getElementById('fotoIn').files[0];
-            if(!document.getElementById('nome').value || !f) {
-                return alert("Por favor, preencha o Nome e selecione uma Foto!");
+            const fotoFile = document.getElementById('fotoIn').files[0];
+            const logoFile = document.getElementById('logoIn').files[0];
+            const nome = document.getElementById('nome').value;
+
+            if(!nome || !fotoFile || !logoFile) {
+                return alert("Por favor, preencha o Nome e selecione tanto a Logo quanto a Foto!");
             }
 
-            const r = new FileReader();
-            r.onload = function(e) {
-                const html = `
-                    <div class="flex flex-col items-center gap-4 mb-10">
-                        <div class="print-area relative w-[450px] h-[280px] bg-white overflow-hidden shadow-2xl border border-gray-300 rounded-sm">
-                            <div class="card-green h-20 px-4 flex items-center justify-between">
-                                <div class="text-white">
-                                    <p class="text-[14px] font-black leading-tight uppercase tracking-tight">SPR JAÍBA E MATIAS CARDOSO</p>
-                                    <p class="text-[10px] font-light uppercase opacity-90">Sindicato dos Produtores Rurais</p>
-                                </div>
-                                <img src="logo-spr.png" class="h-14 bg-white p-1 rounded shadow-sm" onerror="this.src='https://i.ibb.co/Lhy06fN/logo-spr.png'">
-                            </div>
+            const readerFoto = new FileReader();
+            const readerLogo = new FileReader();
 
-                            <div class="flex p-4 gap-4">
-                                <div class="mt-2">
-                                    <div class="w-28 h-32 border-2 border-green-900 rounded bg-gray-50 overflow-hidden">
-                                        <img src="${e.target.result}" class="w-full h-full object-cover">
+            readerLogo.onload = function(eLogo) {
+                readerFoto.onload = function(eFoto) {
+                    const qrId = "qr-" + Date.now();
+                    const html = `
+                        <div class="flex flex-col items-center gap-4 mb-10">
+                            <div class="print-area relative w-[450px] h-[280px] bg-white overflow-hidden shadow-2xl border border-gray-300 rounded-sm">
+                                <div class="card-green h-20 px-4 flex items-center justify-between">
+                                    <div class="text-white">
+                                        <p class="text-[14px] font-black leading-tight uppercase tracking-tight">SPR JAÍBA E MATIAS CARDOSO</p>
+                                        <p class="text-[10px] font-light uppercase opacity-90">Sindicato dos Produtores Rurais</p>
                                     </div>
+                                    <img src="${eLogo.target.result}" class="h-14 bg-white p-1 rounded shadow-sm">
                                 </div>
 
-                                <div class="flex-1 mt-2">
-                                    <p class="text-[8px] text-gray-400 font-bold uppercase">Nome do Filiado</p>
-                                    <p class="text-[14px] font-black text-green-950 mb-2 border-b-2 border-green-100 pb-1">${document.getElementById('nome').value.toUpperCase()}</p>
-                                    
-                                    <div class="grid grid-cols-2 gap-y-3">
-                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">CPF</p><p class="text-[11px] font-bold text-gray-800">${document.getElementById('cpf').value}</p></div>
-                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">Nascimento</p><p class="text-[11px] font-bold text-gray-800">${new Date(document.getElementById('nasc').value).toLocaleDateString('pt-BR')}</p></div>
-                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">Telefone</p><p class="text-[11px] font-bold text-gray-800">${document.getElementById('tel').value}</p></div>
-                                        <div><p class="text-[8px] font-bold text-gray-400 uppercase">Categoria</p><p class="text-[11px] font-bold text-gray-800">${document.getElementById('cat').value}</p></div>
+                                <div class="flex p-4 gap-4">
+                                    <div class="mt-1">
+                                        <div class="w-24 h-28 border-2 border-green-900 rounded bg-gray-50 overflow-hidden shadow-sm">
+                                            <img src="${eFoto.target.result}" class="w-full h-full object-cover">
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            <div class="absolute bottom-6 w-full flex justify-around bg-green-50 border-t border-b border-green-100 py-1">
-                                <div class="text-center"><p class="text-[7px] font-bold uppercase text-green-800">Filiação/Renovação</p><p class="text-[10px] font-black text-gray-800">${new Date(document.getElementById('fili').value).toLocaleDateString('pt-BR')}</p></div>
-                                <div class="text-center"><p class="text-[7px] font-bold uppercase text-red-600">Validade</p><p class="text-[10px] font-black text-red-600">${new Date(document.getElementById('val').value).toLocaleDateString('pt-BR')}</p></div>
-                            </div>
-
-                            <div class="absolute bottom-0 w-full card-green py-1 text-center text-white text-[10px] font-bold tracking-[4px] uppercase">Carteira de Sindicalizado</div>
-                        </div>
-
-                        <div class="no-print flex gap-3">
-                            <button onclick="window.print()" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow hover:bg-blue-700 transition-all flex items-center gap-2">
-                                <span>🖨️ IMPRIMIR OU SALVAR PDF</span>
-                            </button>
-                            <button onclick="this.parentElement.parentElement.remove()" class="text-red-500 font-bold text-sm hover:underline">Remover</button>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('resultado').innerHTML = html;
-            };
-            r.readAsDataURL(f);
-        }
-    </script>
-</body>
-</html>
+                                    <div class="flex-1 mt-1">
+                                        <p class="text-[8px] text-gray-400 font-bold uppercase">Nome do Filiado</p>
+                                        <p class="text-[13px] font-black text-green-950 mb-2 border-b-2 border-green-100 pb-1 uppercase italic">${nome}</p>
+                                        
+                                        <div class="grid grid-cols-2 gap-x-2 gap-y-2">
+                                            <div>
