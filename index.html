@@ -9,11 +9,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
         body { font-family: 'Roboto', sans-serif; background-color: #f1f5f9; }
-        
         @media print {
             body { background: none; padding: 0; }
             .no-print { display: none !important; }
-            .print-area { margin: 0; box-shadow: none; border: none; }
+            .print-area { margin: 0; box-shadow: none; border: none; width: 100%; height: auto; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
         .card-green { background-color: #004d2c !important; }
@@ -22,7 +21,7 @@
 <body class="p-4">
     <div class="max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
         <div class="w-full md:w-80 bg-white p-5 rounded-lg shadow-md no-print border-t-4 border-green-800">
-            <h2 class="text-lg font-black text-green-900 mb-4 border-b pb-2 text-center uppercase">EMISSÃO RÁPIDA</h2>
+            <h2 class="text-lg font-black text-green-900 mb-4 border-b pb-2 text-center uppercase">GERADOR SPR</h2>
             <div class="space-y-3 text-sm">
                 <input type="text" id="nome" placeholder="NOME COMPLETO" class="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-green-500">
                 <div class="grid grid-cols-2 gap-2">
@@ -38,61 +37,92 @@
                     <div class="text-[10px] font-bold text-gray-400 uppercase">FILIAÇÃO<input type="date" id="fili" class="w-full border p-1 rounded font-normal text-black"></div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase">VALIDADE<input type="date" id="val" class="w-full border p-1 rounded font-normal text-black"></div>
                 </div>
-                
                 <div class="bg-green-50 p-3 border-dashed border-2 border-green-200 rounded">
-                    <label class="block text-[10px] font-bold mb-1 text-green-800 uppercase">FOTO DO ASSOCIADO</label>
+                    <label class="block text-[10px] font-bold mb-1 text-green-800 uppercase text-center">FOTO DO ASSOCIADO</label>
                     <input type="file" id="fotoIn" accept="image/*" class="text-[10px] w-full">
                 </div>
-
-                <button onclick="gerar()" class="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-800 transition-all uppercase shadow-md">Gerar Agora</button>
+                <button onclick="gerar()" class="w-full bg-green-700 text-white font-bold py-4 rounded-lg hover:bg-green-800 transition-all uppercase shadow-md mt-2">GERAR CARTEIRINHA</button>
             </div>
         </div>
 
-        <div id="resultado" class="flex-1 flex flex-col items-center">
-            <p class="text-gray-400 mt-10 no-print font-medium italic">Preencha e clique em "Gerar Agora".</p>
+        <div id="resultado" class="flex-1 flex flex-col items-center justify-start min-h-[400px]">
+            <p class="text-gray-400 mt-20 no-print font-medium italic animate-pulse">Preencha os dados e anexe a foto para gerar.</p>
         </div>
     </div>
 
     <script>
         function gerar() {
-            const fotoFile = document.getElementById('fotoIn').files[0];
+            const fotoInput = document.getElementById('fotoIn');
             const nome = document.getElementById('nome').value;
 
-            if(!nome || !fotoFile) return alert("Preencha o Nome e selecione a Foto!");
+            if(!nome || !fotoInput.files[0]) {
+                alert("Por favor, preencha o Nome e escolha uma Foto!");
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const qrId = "qr-" + Date.now();
-                document.getElementById('resultado').innerHTML = `
-                    <div class="flex flex-col items-center gap-4">
-                        <div class="print-area relative w-[450px] h-[280px] bg-white shadow-2xl border border-gray-200 rounded-sm overflow-hidden">
+                const qrId = "qrcode-box";
+                const resultadoDiv = document.getElementById('resultado');
+                
+                resultadoDiv.innerHTML = `
+                    <div class="flex flex-col items-center gap-6">
+                        <div class="print-area relative w-[450px] h-[280px] bg-white shadow-2xl border border-gray-300 rounded-lg overflow-hidden">
                             <div class="card-green h-20 px-4 flex items-center justify-between">
                                 <div class="text-white text-left">
-                                    <p class="text-[13px] font-black uppercase leading-none">SPR JAÍBA E MATIAS CARDOSO</p>
-                                    <p class="text-[9px] font-light uppercase">Sindicato dos Produtores Rurais</p>
+                                    <p class="text-[14px] font-black uppercase leading-tight">SPR JAÍBA E MATIAS CARDOSO</p>
+                                    <p class="text-[9px] font-light uppercase opacity-90">Sindicato dos Produtores Rurais</p>
                                 </div>
-                                <img src="https://i.postimg.cc/85M0fC8Q/logo-atualizada-spr.png" class="h-14 bg-white p-1 rounded">
+                                <img src="https://i.ibb.co/Lhy06fN/logo-spr.png" class="h-14 bg-white p-1 rounded shadow-sm">
                             </div>
 
                             <div class="flex p-4 gap-4">
-                                <div class="w-24 h-28 border-2 border-green-900 rounded bg-gray-50 overflow-hidden shadow-sm">
+                                <div class="w-24 h-28 border-2 border-green-900 rounded bg-gray-100 overflow-hidden shadow-sm">
                                     <img src="${e.target.result}" class="w-full h-full object-cover">
                                 </div>
                                 <div class="flex-1 text-left">
                                     <p class="text-[8px] font-bold text-gray-400 uppercase">Nome do Filiado</p>
-                                    <p class="text-[14px] font-black text-green-950 border-b-2 border-green-100 pb-1 uppercase italic">${nome}</p>
+                                    <p class="text-[14px] font-black text-green-950 border-b border-green-100 pb-1 uppercase italic">${nome}</p>
                                     <div class="grid grid-cols-2 gap-y-2 mt-2">
-                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">CPF</p><p class="text-[10px] font-bold">${document.getElementById('cpf').value}</p></div>
-                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">Nasc.</p><p class="text-[10px] font-bold">${new Date(document.getElementById('nasc').value).toLocaleDateString('pt-BR')}</p></div>
-                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">Telefone</p><p class="text-[10px] font-bold">${document.getElementById('tel').value}</p></div>
-                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">Categoria</p><p class="text-[10px] font-bold">${document.getElementById('cat').value}</p></div>
+                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">CPF</p><p class="text-[10px] font-bold text-gray-800">${document.getElementById('cpf').value}</p></div>
+                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">Nasc.</p><p class="text-[10px] font-bold text-gray-800">${new Date(document.getElementById('nasc').value).toLocaleDateString('pt-BR')}</p></div>
+                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">Telefone</p><p class="text-[10px] font-bold text-gray-800">${document.getElementById('tel').value}</p></div>
+                                        <div><p class="text-[7px] font-bold text-gray-400 uppercase">Categoria</p><p class="text-[10px] font-bold text-gray-800">${document.getElementById('cat').value}</p></div>
                                     </div>
                                 </div>
-                                <div class="flex flex-col items-center justify-center pr-2">
-                                    <div id="${qrId}"></div>
-                                    <p class="text-[6px] font-bold text-gray-400 mt-1 uppercase">Validar</p>
+                                <div class="flex flex-col items-center justify-center">
+                                    <div id="${qrId}" class="bg-white p-1"></div>
+                                    <p class="text-[6px] font-bold text-gray-400 mt-1">VERIFICAR</p>
                                 </div>
                             </div>
 
                             <div class="absolute bottom-6 w-full flex justify-around bg-green-50 border-t border-b border-green-100 py-1">
-                                <div class="text-center"><p class
+                                <div class="text-center"><p class="text-[7px] font-bold uppercase text-green-800">Filiação</p><p class="text-[10px] font-black text-gray-800">${new Date(document.getElementById('fili').value).toLocaleDateString('pt-BR')}</p></div>
+                                <div class="text-center"><p class="text-[7px] font-bold uppercase text-green-800">Validade</p><p class="text-[10px] font-black text-gray-800">${new Date(document.getElementById('val').value).toLocaleDateString('pt-BR')}</p></div>
+                            </div>
+                            
+                            <div class="absolute bottom-0 w-full card-green py-1 text-center text-white text-[10px] font-bold tracking-[4px] uppercase">Carteira de Sindicalizado</div>
+                        </div>
+                        
+                        <button onclick="window.print()" class="no-print bg-blue-600 text-white px-10 py-3 rounded-full font-bold shadow-xl hover:bg-blue-700 transition-transform active:scale-95">
+                            🖨️ IMPRIMIR / SALVAR PDF
+                        </button>
+                    </div>
+                `;
+
+                // Gerar o QR Code após o HTML ser inserido
+                setTimeout(() => {
+                    new QRCode(document.getElementById(qrId), {
+                        text: "FILIADO: " + nome + " CPF: " + document.getElementById('cpf').value,
+                        width: 55,
+                        height: 55,
+                        colorDark : "#004d2c",
+                        colorLight : "#ffffff",
+                    });
+                }, 100);
+            };
+            reader.readAsDataURL(fotoInput.files[0]);
+        }
+    </script>
+</body>
+</html>
