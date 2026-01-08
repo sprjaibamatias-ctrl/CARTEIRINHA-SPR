@@ -1,147 +1,153 @@
-<!doctype html>
-<html lang="pt-br" class="h-full">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SindiCard - Gerador de Carteirinhas</title>
+    <title>Gerador de Carteirinha - SPR Jaíba e Matias</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
         @media print { .no-print { display: none; } }
+        .card-bg { background-color: #1a4731; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-full">
-
-    <div class="max-w-6xl mx-auto p-4 md:p-8">
-        <header class="text-center mb-10 no-print">
-            <h1 class="text-3xl font-bold text-green-900">Gerador de Carteirinha Sindical</h1>
-            <p class="text-slate-600">Preencha os dados para gerar o documento automaticamente</p>
-        </header>
-
-        <div class="grid lg:grid-cols-3 gap-8">
-            <section class="lg:col-span-1 no-print">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h2 class="text-xl font-semibold mb-4 text-slate-800">Dados do Associado</h2>
-                    <form id="sindiForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Nome Completo</label>
-                            <input type="text" id="nome" required class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-green-500 outline-none">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Matrícula</label>
-                                <input type="text" id="matricula" required placeholder="0001" class="w-full mt-1 p-2 border rounded-md">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">CPF</label>
-                                <input type="text" id="cpf" required placeholder="000.000.000-00" class="w-full mt-1 p-2 border rounded-md">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Categoria</label>
-                            <select id="categoria" class="w-full mt-1 p-2 border rounded-md">
-                                <option>Associado Efetivo</option>
-                                <option>Aposentado</option>
-                                <option>Pensionista</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Foto do Associado</label>
-                            <input type="file" id="fotoFile" accept="image/*" class="w-full mt-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
-                        </div>
-                        <button type="submit" class="w-full bg-green-700 text-white font-bold py-3 rounded-md hover:bg-green-800 transition shadow-md">
-                            Gerar Carteirinha
-                        </button>
-                    </form>
+<body class="bg-slate-100 p-4">
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-8">
+        <div class="w-full md:w-1/3 bg-white p-6 rounded-xl shadow-lg no-print">
+            <h2 class="text-xl font-bold mb-4 text-green-800">Dados do Associado</h2>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block font-medium">Nome Completo</label>
+                    <input type="text" id="nome" class="w-full border p-2 rounded">
                 </div>
-            </section>
-
-            <section class="lg:col-span-2">
-                <div id="listaCarteirinhas" class="grid md:grid-cols-1 gap-8 justify-items-center">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium">CPF</label>
+                        <input type="text" id="cpf" placeholder="000.000.000-00" class="w-full border p-2 rounded">
                     </div>
-            </section>
+                    <div>
+                        <label class="block font-medium">Nascimento</label>
+                        <input type="date" id="nascimento" class="w-full border p-2 rounded">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium">Telefone</label>
+                    <input type="text" id="telefone" placeholder="(00) 00000-0000" class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block font-medium">Categoria</label>
+                    <select id="categoria" class="w-full border p-2 rounded">
+                        <option value="Agricultor">Agricultor</option>
+                        <option value="Pecuarista">Pecuarista</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium">Última Filiação</label>
+                        <input type="date" id="filiacao" class="w-full border p-2 rounded">
+                    </div>
+                    <div>
+                        <label class="block font-medium">Validade</label>
+                        <input type="date" id="validade" class="w-full border p-2 rounded">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium">Foto do Associado</label>
+                    <input type="file" id="fotoInput" accept="image/*" class="w-full border p-2 rounded">
+                </div>
+                <button onclick="gerarCarteirinha()" class="w-full bg-green-700 text-white py-3 rounded-lg font-bold hover:bg-green-800 transition">Gerar Carteirinha</button>
+            </div>
         </div>
+
+        <div id="listaCarteirinhas" class="flex-1 space-y-6">
+            </div>
     </div>
 
     <script>
-        const form = document.getElementById('sindiForm');
-        const lista = document.getElementById('listaCarteirinhas');
-        let fotoBase64 = "";
-
-        // Converte a imagem para Base64 para salvar localmente
-        document.getElementById('fotoFile').addEventListener('change', function(e) {
-            const reader = new FileReader();
-            reader.onload = function() { fotoBase64 = reader.result; };
-            reader.readAsDataURL(e.target.files[0]);
-        });
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+        function gerarCarteirinha() {
             const dados = {
-                nome: document.getElementById('nome').value,
-                matricula: document.getElementById('matricula').value,
+                nome: document.getElementById('nome').value.toUpperCase(),
                 cpf: document.getElementById('cpf').value,
+                nascimento: new Date(document.getElementById('nascimento').value).toLocaleDateString('pt-BR'),
+                telefone: document.getElementById('telefone').value,
                 categoria: document.getElementById('categoria').value,
-                foto: fotoBase64 || "https://via.placeholder.com/150",
+                filiacao: new Date(document.getElementById('filiacao').value).toLocaleDateString('pt-BR'),
+                validade: new Date(document.getElementById('validade').value).toLocaleDateString('pt-BR'),
                 id: Date.now()
             };
 
-            criarLayoutCarteirinha(dados);
-            form.reset();
-            fotoBase64 = "";
-        });
+            const fotoFile = document.getElementById('fotoInput').files[0];
+            const reader = new FileReader();
 
-        function criarLayoutCarteirinha(dados) {
-            const html = `
-                <div class="relative bg-white w-[350px] h-[520px] rounded-2xl overflow-hidden card-shadow border border-slate-200 mb-8" id="card-${dados.id}">
-                    <div class="bg-green-800 h-32 flex flex-col items-center justify-center text-white p-4">
-                        <h2 class="font-bold text-xl tracking-tighter">SINDICATO UNIDO</h2>
-                        <p class="text-[10px] opacity-80 uppercase text-center leading-tight">Defendendo os Direitos do Trabalhador</p>
-                    </div>
-
-                    <div class="absolute top-20 left-1/2 -translate-x-1/2">
-                        <div class="w-32 h-40 bg-slate-200 border-4 border-white rounded-lg overflow-hidden shadow-lg">
-                            <img src="${dados.foto}" class="w-full h-full object-cover">
+            reader.onload = function(e) {
+                const html = `
+                    <div id="card-${dados.id}" class="relative w-[400px] h-[250px] bg-white rounded-xl shadow-2xl border-2 border-green-900 overflow-hidden mx-auto bg-slate-50">
+                        <div class="card-bg h-16 flex items-center px-4 relative">
+                            <div class="text-white">
+                                <h1 class="font-bold text-sm leading-tight">SPR - JAÍBA E MATIAS CARDOSO</h1>
+                                <p class="text-[9px] opacity-90">SINDICATO DOS PRODUTORES RURAIS</p>
+                            </div>
+                            <img src="https://i.ibb.co/Lhy06fN/logo-spr.png" class="absolute right-2 top-1 h-14 bg-white p-1 rounded shadow-sm" alt="Logo SPR">
                         </div>
-                    </div>
 
-                    <div class="mt-32 p-6 text-center space-y-4">
-                        <div>
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Nome do Associado</p>
-                            <p class="text-lg font-bold text-slate-800 leading-tight">${dados.nome}</p>
+                        <div class="p-3 flex gap-4">
+                            <div class="mt-4">
+                                <div class="w-24 h-28 bg-gray-200 border-2 border-green-800 rounded-md overflow-hidden shadow-inner">
+                                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+
+                            <div class="flex-1 space-y-1 pt-1">
+                                <div>
+                                    <p class="text-[8px] uppercase text-gray-500 font-bold">Nome do Associado</p>
+                                    <p class="text-[13px] font-black text-green-900 leading-tight border-b border-gray-200 pb-1">${dados.nome}</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 mt-1">
+                                    <div>
+                                        <p class="text-[8px] text-gray-500 font-bold uppercase">CPF</p>
+                                        <p class="text-[10px] font-bold text-gray-800">${dados.cpf}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[8px] text-gray-500 font-bold uppercase">Nascimento</p>
+                                        <p class="text-[10px] font-bold text-gray-800">${dados.nascimento}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-[8px] text-gray-500 font-bold uppercase">Telefone</p>
+                                    <p class="text-[10px] font-bold text-gray-800">${dados.telefone}</p>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <div class="flex justify-around border-t border-b py-2 border-slate-100">
+
+                        <div class="absolute bottom-6 left-0 right-0 bg-green-50 border-t border-b border-green-200 py-1 px-4 flex justify-between text-center">
                             <div>
-                                <p class="text-[9px] text-slate-400 uppercase">Matrícula</p>
-                                <p class="font-bold text-slate-700">${dados.matricula}</p>
+                                <p class="text-[7px] font-bold text-green-800 uppercase">Filiação/Renovação</p>
+                                <p class="text-[9px] font-black text-gray-800">${dados.filiacao}</p>
                             </div>
                             <div>
-                                <p class="text-[9px] text-slate-400 uppercase">Categoria</p>
-                                <p class="font-bold text-slate-700">${dados.categoria}</p>
+                                <p class="text-[7px] font-bold text-green-800 uppercase">Categoria</p>
+                                <p class="text-[9px] font-black text-gray-800">${dados.categoria}</p>
+                            </div>
+                            <div>
+                                <p class="text-[7px] font-bold text-red-700 uppercase">Validade</p>
+                                <p class="text-[9px] font-black text-red-700">${dados.validade}</p>
                             </div>
                         </div>
 
-                        <div class="flex flex-col items-center pt-2">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${dados.matricula}" class="w-20 h-20">
-                            <p class="text-[10px] text-slate-400 mt-1">Valide via QR Code</p>
+                        <div class="absolute bottom-0 w-full card-bg py-1 text-center text-white text-[9px] font-bold tracking-widest">
+                            CARTEIRA DE SINDICALIZADO
+                        </div>
+
+                        <div class="no-print absolute top-18 right-2 flex gap-1 pt-16">
+                            <button onclick="window.print()" class="bg-white/80 hover:bg-white p-1 rounded text-green-800 border border-green-800 shadow text-[10px]">🖨️ Imprimir</button>
+                            <button onclick="document.getElementById('card-${dados.id}').remove()" class="bg-red-500/80 hover:bg-red-500 p-1 rounded text-white shadow text-[10px]">❌</button>
                         </div>
                     </div>
+                `;
+                document.getElementById('listaCarteirinhas').insertAdjacentHTML('afterbegin', html);
+            };
 
-                    <div class="absolute bottom-0 w-full bg-amber-400 py-2 text-center text-amber-900 font-bold text-sm">
-                        CARTEIRA DE SINDICALIZADO
-                    </div>
-
-                    <div class="no-print absolute top-2 right-2 flex gap-2">
-                        <button onclick="window.print()" class="bg-white/20 hover:bg-white/40 p-1 rounded text-white text-xs">🖨️</button>
-                        <button onclick="document.getElementById('card-${dados.id}').remove()" class="bg-red-500/80 hover:bg-red-500 p-1 rounded text-white text-xs">✕</button>
-                    </div>
-                </div>
-            `;
-            lista.insertAdjacentHTML('afterbegin', html);
+            if(fotoFile) reader.readAsDataURL(fotoFile);
+            else alert("Por favor, selecione uma foto!");
         }
     </script>
 </body>
